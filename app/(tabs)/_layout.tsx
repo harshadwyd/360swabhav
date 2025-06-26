@@ -1,7 +1,129 @@
 import { Tabs } from 'expo-router';
 import { Chrome as Home, ChartBar as BarChart3, Trophy, User, Plus, Users, TrendingUp, UserCheck } from 'lucide-react-native';
 
+// For demo purposes, we'll simulate role detection
+// In a real app, this would come from authentication/user context
+const getUserRole = () => {
+  // This would typically come from your auth context or user state
+  // For now, we'll determine based on current route or use a default
+  // You can change this to 'coach' to test coach navigation
+  return 'student'; // or 'coach'
+};
+
 export default function TabLayout() {
+  const userRole = getUserRole();
+
+  if (userRole === 'coach') {
+    // Coach-only navigation
+    return (
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarStyle: {
+            backgroundColor: '#1a1a1a',
+            borderTopColor: 'rgba(255, 255, 255, 0.1)',
+            borderTopWidth: 1,
+            paddingBottom: 8,
+            paddingTop: 8,
+            height: 80,
+          },
+          tabBarActiveTintColor: '#4ECDC4',
+          tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.5)',
+          tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: '600',
+          },
+        }}
+      >
+        <Tabs.Screen
+          name="coach-dashboard"
+          options={{
+            title: 'Dashboard',
+            tabBarIcon: ({ size, color }) => (
+              <Home size={size} color={color} />
+            ),
+            href: '/coach-dashboard',
+          }}
+        />
+        <Tabs.Screen
+          name="students"
+          options={{
+            title: 'Students',
+            tabBarIcon: ({ size, color }) => (
+              <Users size={size} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="coach-analytics"
+          options={{
+            title: 'Analytics',
+            tabBarIcon: ({ size, color }) => (
+              <BarChart3 size={size} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="tools"
+          options={{
+            title: 'Tools',
+            tabBarIcon: ({ size, color }) => (
+              <UserCheck size={size} color={color} />
+            ),
+            href: '/(coach)/tools',
+          }}
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: 'Profile',
+            tabBarIcon: ({ size, color }) => (
+              <User size={size} color={color} />
+            ),
+          }}
+        />
+        {/* Hide student-only tabs */}
+        <Tabs.Screen
+          name="index"
+          options={{
+            href: null, // This hides the tab
+          }}
+        />
+        <Tabs.Screen
+          name="track"
+          options={{
+            href: null, // This hides the tab
+          }}
+        />
+        <Tabs.Screen
+          name="progress"
+          options={{
+            href: null, // This hides the tab
+          }}
+        />
+        <Tabs.Screen
+          name="achievements"
+          options={{
+            href: null, // This hides the tab
+          }}
+        />
+        <Tabs.Screen
+          name="analytics"
+          options={{
+            href: null, // This hides the tab
+          }}
+        />
+        <Tabs.Screen
+          name="community"
+          options={{
+            href: null, // This hides the tab
+          }}
+        />
+      </Tabs>
+    );
+  }
+
+  // Student-only navigation (default)
   return (
     <Tabs
       screenOptions={{
@@ -77,22 +199,37 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="coach"
-        options={{
-          title: 'Coach',
-          tabBarIcon: ({ size, color }) => (
-            <UserCheck size={size} color={color} />
-          ),
-          href: '/(coach)/dashboard',
-        }}
-      />
-      <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
           tabBarIcon: ({ size, color }) => (
             <User size={size} color={color} />
           ),
+        }}
+      />
+      {/* Hide coach-only tabs */}
+      <Tabs.Screen
+        name="coach-dashboard"
+        options={{
+          href: null, // This hides the tab
+        }}
+      />
+      <Tabs.Screen
+        name="students"
+        options={{
+          href: null, // This hides the tab
+        }}
+      />
+      <Tabs.Screen
+        name="coach-analytics"
+        options={{
+          href: null, // This hides the tab
+        }}
+      />
+      <Tabs.Screen
+        name="tools"
+        options={{
+          href: null, // This hides the tab
         }}
       />
     </Tabs>

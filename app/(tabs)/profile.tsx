@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'rea
 import { LinearGradient } from 'expo-linear-gradient';
 import { User, Settings, Bell, Shield, CircleHelp as HelpCircle, LogOut, CreditCard as Edit3, Trophy, Star, Calendar, Camera } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import RoleSwitcher from '@/components/RoleSwitcher';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -64,6 +65,15 @@ export default function ProfileScreen() {
             </View>
           </View>
         </LinearGradient>
+
+        {/* Role Switcher - Demo Feature */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>🔄 Demo: Switch User Role</Text>
+          <RoleSwitcher />
+          <Text style={styles.demoNote}>
+            Switch between Student and Coach views to see role-based navigation
+          </Text>
+        </View>
 
         {/* Stats Grid */}
         <View style={styles.statsContainer}>
@@ -248,6 +258,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: 'rgba(255, 255, 255, 0.8)',
   },
+  section: {
+    paddingHorizontal: 24,
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 16,
+  },
+  demoNote: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.6)',
+    textAlign: 'center',
+    marginTop: 8,
+    fontStyle: 'italic',
+  },
   statsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -289,12 +316,6 @@ const styles = StyleSheet.create({
   sectionContainer: {
     paddingHorizontal: 24,
     marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 16,
   },
   achievementsContainer: {
     flexDirection: 'row',
