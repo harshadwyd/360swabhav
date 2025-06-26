@@ -9,7 +9,7 @@ export default function RoleSwitcher() {
     
     Alert.alert(
       'Switch Role',
-      `Switch from ${currentRole} to ${newRole}? This will refresh the app to show the new navigation.`,
+      `Switch from ${currentRole} to ${newRole}? The navigation will update immediately.`,
       [
         { text: 'Cancel', style: 'cancel' },
         { 
