@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Users, TrendingUp, AlertTriangle, Trophy, MessageCircle, Calendar, Target, Star, ChevronRight, Bell, Award } from 'lucide-react-native';
+import { Users, TrendingUp, TriangleAlert as AlertTriangle, Trophy, MessageCircle, Calendar, Target, Star, ChevronRight, Bell, Award } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');

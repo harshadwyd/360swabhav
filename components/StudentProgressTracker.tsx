@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { TrendingUp, TrendingDown, Target, Trophy, Calendar, AlertTriangle, Star, Users } from 'lucide-react-native';
+import { TrendingUp, TrendingDown, Target, Trophy, Calendar, TriangleAlert as AlertTriangle, Star, Users } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
