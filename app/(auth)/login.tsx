@@ -41,10 +41,10 @@ export default function Login() {
           {
             text: 'Continue',
             onPress: () => {
-              // Small delay to ensure role is set
+              // Longer delay to ensure role is properly set
               setTimeout(() => {
                 router.replace('/(tabs)');
-              }, 100);
+              }, 200);
             },
           },
         ]
@@ -61,10 +61,10 @@ export default function Login() {
           {
             text: 'Continue',
             onPress: () => {
-              // Small delay to ensure role is set
+              // Longer delay to ensure role is properly set
               setTimeout(() => {
                 router.replace('/(tabs)');
-              }, 100);
+              }, 200);
             },
           },
         ]

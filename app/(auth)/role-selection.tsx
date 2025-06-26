@@ -67,7 +67,7 @@ export default function OnboardingRoleSelection() {
     // Navigate directly to the main app with the selected role
     setTimeout(() => {
       router.replace('/(tabs)');
-    }, 100);
+    }, 200);
   };
 
   return (

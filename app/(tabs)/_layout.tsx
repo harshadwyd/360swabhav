@@ -5,11 +5,23 @@ import { useEffect, useState } from 'react';
 
 export default function TabLayout() {
   const userRole = useUserRole();
+  const [isReady, setIsReady] = useState(false);
   
   // Debug logging
   useEffect(() => {
     console.log('TabLayout - Current role:', userRole);
+    // Small delay to ensure role is properly set
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, [userRole]);
+
+  // Don't render until we're ready to prevent flashing
+  if (!isReady) {
+    return null;
+  }
 
   if (userRole === 'coach') {
     console.log('Rendering coach navigation');
