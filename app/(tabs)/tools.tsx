@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MessageCircle, Calendar, Trophy, Target, Users, Send, Mic, Camera, Award, ChevronRight, Download, Upload, Settings, FileText, Book, Zap, Lightbulb } from 'lucide-react-native';
+import { MessageCircle, Calendar, Trophy, Target, Users, Send, Mic, Camera, Award, ChevronRight, Download, Upload, Settings, FileText, Book, Zap, Lightbulb, Plus, TrendingUp } from 'lucide-react-native';
 
 interface Student {
   id: string;
@@ -415,14 +415,11 @@ export default function CoachingToolsScreen() {
               <Text style={styles.challengeDuration}>{challenge.duration}</Text>
               <Text style={styles.challengePoints}>{challenge.points} points</Text>
             </View>
-            <TouchableOpacity 
-              style={styles.createChallengeButton}
-              onPress={() => handleCreateChallenge(challenge.id)}
-            >
+            <View style={styles.createChallengeButton}>
               <Text style={styles.createChallengeText}>Create Challenge</Text>
               <ChevronRight size={16} color="#4ECDC4" />
-            </TouchableOpacity>
-          </View>
+            </View>
+          </TouchableOpacity>
         ))}
       </View>
 
