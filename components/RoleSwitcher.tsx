@@ -9,12 +9,15 @@ export default function RoleSwitcher() {
     
     Alert.alert(
       'Switch Role',
-      `Switch from ${currentRole} to ${newRole}? This will refresh the app.`,
+      `Switch from ${currentRole} to ${newRole}? This will refresh the app to show the new navigation.`,
       [
         { text: 'Cancel', style: 'cancel' },
         { 
           text: 'Switch', 
-          onPress: () => switchUserRole(newRole),
+          onPress: () => {
+            console.log(`Switching from ${currentRole} to ${newRole}`);
+            switchUserRole(newRole);
+          },
           style: 'default'
         },
       ]
@@ -33,8 +36,8 @@ export default function RoleSwitcher() {
       </TouchableOpacity>
       <Text style={styles.description}>
         {currentRole === 'student' 
-          ? 'Switch to Coach to see student management tools'
-          : 'Switch to Student to see character development features'
+          ? 'Switch to Coach to see student management tools and teal navigation'
+          : 'Switch to Student to see character development features and red navigation'
         }
       </Text>
     </View>

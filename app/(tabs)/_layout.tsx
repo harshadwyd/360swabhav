@@ -1,11 +1,23 @@
 import { Tabs } from 'expo-router';
-import { Chrome as Home, ChartBar as BarChart3, Trophy, User, Plus, Users, TrendingUp, UserCheck } from 'lucide-react-native';
-import { useUserRole } from '@/hooks/useUserRole';
+import { Chrome as Home, ChartBar as BarChart3, Trophy, User, Plus, Users, TrendingUp, UserCheck, Settings } from 'lucide-react-native';
+import { useUserRole, getCurrentRole } from '@/hooks/useUserRole';
+import { useEffect, useState } from 'react';
 
 export default function TabLayout() {
   const userRole = useUserRole();
+  const [currentRole, setCurrentRole] = useState<'student' | 'coach'>(() => getCurrentRole());
 
-  if (userRole === 'coach') {
+  // Update current role when userRole changes
+  useEffect(() => {
+    setCurrentRole(userRole);
+  }, [userRole]);
+
+  // Debug logging
+  useEffect(() => {
+    console.log('Current role in TabLayout:', currentRole);
+  }, [currentRole]);
+
+  if (currentRole === 'coach') {
     // Coach-only navigation
     return (
       <Tabs
@@ -59,7 +71,7 @@ export default function TabLayout() {
           options={{
             title: 'Tools',
             tabBarIcon: ({ size, color }) => (
-              <UserCheck size={size} color={color} />
+              <Settings size={size} color={color} />
             ),
           }}
         />
