@@ -2,10 +2,11 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'rea
 import { LinearGradient } from 'expo-linear-gradient';
 import { User, Settings, Bell, Shield, CircleHelp as HelpCircle, LogOut, CreditCard as Edit3, Trophy, Star, Calendar, Camera } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import RoleSwitcher from '@/components/RoleSwitcher';
+import { useUserRole } from '@/hooks/useUserRole';
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const currentRole = useUserRole();
 
   const userStats = [
     { label: 'Total Points', value: '2,847', icon: Trophy },
@@ -37,6 +38,26 @@ export default function ProfileScreen() {
     );
   };
 
+  const getUserDisplayName = () => {
+    switch (currentRole) {
+      case 'coach':
+        return 'Coach Johnson';
+      case 'student':
+      default:
+        return 'Alex Johnson';
+    }
+  };
+
+  const getUserRoleDisplay = () => {
+    switch (currentRole) {
+      case 'coach':
+        return 'Professional Coach';
+      case 'student':
+      default:
+        return 'Silver Athlete';
+    }
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -54,8 +75,8 @@ export default function ProfileScreen() {
                 <Camera size={16} color="#FFFFFF" />
               </TouchableOpacity>
             </View>
-            <Text style={styles.userName}>Alex Johnson</Text>
-            <Text style={styles.userRole}>Silver Athlete</Text>
+            <Text style={styles.userName}>{getUserDisplayName()}</Text>
+            <Text style={styles.userRole}>{getUserRoleDisplay()}</Text>
             <View style={styles.levelContainer}>
               <Text style={styles.levelText}>Level 12</Text>
               <View style={styles.xpBar}>
@@ -66,13 +87,20 @@ export default function ProfileScreen() {
           </View>
         </LinearGradient>
 
-        {/* Role Switcher - Demo Feature */}
+        {/* Current Role Display */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🔄 Demo: Switch User Role</Text>
-          <RoleSwitcher />
-          <Text style={styles.demoNote}>
-            Switch between Student and Coach views to see role-based navigation
-          </Text>
+          <Text style={styles.sectionTitle}>👤 Current Role</Text>
+          <View style={styles.roleDisplayCard}>
+            <Text style={styles.roleDisplayText}>
+              You are logged in as: <Text style={styles.roleHighlight}>{currentRole.toUpperCase()}</Text>
+            </Text>
+            <Text style={styles.roleDescription}>
+              {currentRole === 'coach' 
+                ? 'You have access to student management tools, coaching analytics, and professional features.'
+                : 'You have access to character development features, progress tracking, and student tools.'
+              }
+            </Text>
+          </View>
         </View>
 
         {/* Stats Grid */}
@@ -268,12 +296,26 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     marginBottom: 16,
   },
-  demoNote: {
-    fontSize: 12,
+  roleDisplayCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  roleDisplayText: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginBottom: 8,
+  },
+  roleHighlight: {
+    fontWeight: '700',
+    color: '#4ECDC4',
+  },
+  roleDescription: {
+    fontSize: 14,
     color: 'rgba(255, 255, 255, 0.6)',
-    textAlign: 'center',
-    marginTop: 8,
-    fontStyle: 'italic',
+    lineHeight: 20,
   },
   statsContainer: {
     flexDirection: 'row',

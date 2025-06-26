@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'reac
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react-native';
+import { switchUserRole } from '@/hooks/useUserRole';
 
 export default function Login() {
   const router = useRouter();
@@ -13,24 +14,50 @@ export default function Login() {
   });
   const [showPassword, setShowPassword] = useState(false);
 
+  // Demo accounts for different roles
+  const demoAccounts = {
+    'student@demo.com': { role: 'student', name: 'Demo Student' },
+    'coach@demo.com': { role: 'coach', name: 'Demo Coach' },
+  };
+
   const handleLogin = async () => {
     if (!formData.email || !formData.password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
-    // TODO: Implement actual login logic
-    // For now, simulate successful login
-    Alert.alert(
-      'Success',
-      'Welcome back!',
-      [
-        {
-          text: 'OK',
-          onPress: () => router.replace('/(tabs)'),
-        },
-      ]
-    );
+    // Check if it's a demo account
+    const demoAccount = demoAccounts[formData.email.toLowerCase() as keyof typeof demoAccounts];
+    
+    if (demoAccount) {
+      // Set the appropriate role based on the demo account
+      switchUserRole(demoAccount.role as 'student' | 'coach');
+      
+      Alert.alert(
+        'Login Successful',
+        `Welcome back, ${demoAccount.name}! You're logged in as a ${demoAccount.role}.`,
+        [
+          {
+            text: 'Continue',
+            onPress: () => router.replace('/(tabs)'),
+          },
+        ]
+      );
+    } else {
+      // For any other email, default to student role
+      switchUserRole('student');
+      
+      Alert.alert(
+        'Login Successful',
+        'Welcome back! You\'re logged in as a student.',
+        [
+          {
+            text: 'Continue',
+            onPress: () => router.replace('/(tabs)'),
+          },
+        ]
+      );
+    }
   };
 
   return (
@@ -42,6 +69,13 @@ export default function Login() {
         <View style={styles.header}>
           <Text style={styles.title}>Welcome Back</Text>
           <Text style={styles.subtitle}>Sign in to continue your journey</Text>
+        </View>
+
+        <View style={styles.demoSection}>
+          <Text style={styles.demoTitle}>Demo Accounts:</Text>
+          <Text style={styles.demoAccount}>Student: student@demo.com</Text>
+          <Text style={styles.demoAccount}>Coach: coach@demo.com</Text>
+          <Text style={styles.demoNote}>Password: any password</Text>
         </View>
 
         <View style={styles.form}>
@@ -131,6 +165,29 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     color: 'rgba(255, 255, 255, 0.8)',
+  },
+  demoSection: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 32,
+  },
+  demoTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginBottom: 8,
+  },
+  demoAccount: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginBottom: 4,
+  },
+  demoNote: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontStyle: 'italic',
+    marginTop: 8,
   },
   form: {
     gap: 20,

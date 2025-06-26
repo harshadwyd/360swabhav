@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert 
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Eye, EyeOff, User, Mail, Lock, Phone } from 'lucide-react-native';
+import { switchUserRole } from '@/hooks/useUserRole';
 
 export default function Register() {
   const router = useRouter();
@@ -29,14 +30,16 @@ export default function Register() {
       return;
     }
 
-    // TODO: Implement actual registration logic
-    // For now, simulate successful registration
+    // Set the user role based on the selected role from role selection
+    const userRole = role === 'coach' ? 'coach' : 'student';
+    switchUserRole(userRole);
+
     Alert.alert(
-      'Success',
-      'Account created successfully!',
+      'Account Created Successfully!',
+      `Welcome to Swabhav360, ${formData.name}! You're registered as a ${userRole}.`,
       [
         {
-          text: 'OK',
+          text: 'Continue',
           onPress: () => router.replace('/(tabs)'),
         },
       ]
