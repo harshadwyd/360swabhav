@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Chrome as Home, ChartBar as BarChart3, Trophy, User, Plus, Users, TrendingUp } from 'lucide-react-native';
+import { Chrome as Home, ChartBar as BarChart3, Trophy, User, Plus, Users, TrendingUp, UserCheck } from 'lucide-react-native';
 
 export default function TabLayout() {
   return (
@@ -74,6 +74,16 @@ export default function TabLayout() {
           tabBarIcon: ({ size, color }) => (
             <Users size={size} color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="coach"
+        options={{
+          title: 'Coach',
+          tabBarIcon: ({ size, color }) => (
+            <UserCheck size={size} color={color} />
+          ),
+          href: '/(coach)/dashboard',
         }}
       />
       <Tabs.Screen
