@@ -10,10 +10,12 @@ export default function TabLayout() {
   // Debug logging
   useEffect(() => {
     console.log('TabLayout - Current role:', userRole);
-    // Small delay to ensure role is properly set
+    
+    // Longer delay to ensure role is properly set before rendering
     const timer = setTimeout(() => {
       setIsReady(true);
-    }, 100);
+      console.log('TabLayout - Ready to render with role:', userRole);
+    }, 300);
     
     return () => clearTimeout(timer);
   }, [userRole]);
