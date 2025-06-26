@@ -1,17 +1,9 @@
 import { Tabs } from 'expo-router';
 import { Chrome as Home, ChartBar as BarChart3, Trophy, User, Plus, Users, TrendingUp, UserCheck } from 'lucide-react-native';
-
-// For demo purposes, we'll simulate role detection
-// In a real app, this would come from authentication/user context
-const getUserRole = () => {
-  // This would typically come from your auth context or user state
-  // For now, we'll determine based on current route or use a default
-  // You can change this to 'coach' to test coach navigation
-  return 'student'; // or 'coach'
-};
+import { useUserRole } from '@/hooks/useUserRole';
 
 export default function TabLayout() {
-  const userRole = getUserRole();
+  const userRole = useUserRole();
 
   if (userRole === 'coach') {
     // Coach-only navigation
@@ -42,7 +34,6 @@ export default function TabLayout() {
             tabBarIcon: ({ size, color }) => (
               <Home size={size} color={color} />
             ),
-            href: '/coach-dashboard',
           }}
         />
         <Tabs.Screen
@@ -70,7 +61,6 @@ export default function TabLayout() {
             tabBarIcon: ({ size, color }) => (
               <UserCheck size={size} color={color} />
             ),
-            href: '/(coach)/tools',
           }}
         />
         <Tabs.Screen

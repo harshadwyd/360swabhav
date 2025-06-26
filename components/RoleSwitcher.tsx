@@ -1,4 +1,4 @@
-import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, View, Alert } from 'react-native';
 import { UserRole, switchUserRole, useUserRole } from '@/hooks/useUserRole';
 
 export default function RoleSwitcher() {
@@ -6,17 +6,37 @@ export default function RoleSwitcher() {
 
   const handleRoleSwitch = () => {
     const newRole: UserRole = currentRole === 'student' ? 'coach' : 'student';
-    switchUserRole(newRole);
+    
+    Alert.alert(
+      'Switch Role',
+      `Switch from ${currentRole} to ${newRole}? This will refresh the app.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Switch', 
+          onPress: () => switchUserRole(newRole),
+          style: 'default'
+        },
+      ]
+    );
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.currentRole}>Current Role: {currentRole}</Text>
+      <Text style={styles.currentRole}>
+        Current Role: <Text style={styles.roleHighlight}>{currentRole.toUpperCase()}</Text>
+      </Text>
       <TouchableOpacity style={styles.switchButton} onPress={handleRoleSwitch}>
         <Text style={styles.switchText}>
           Switch to {currentRole === 'student' ? 'Coach' : 'Student'}
         </Text>
       </TouchableOpacity>
+      <Text style={styles.description}>
+        {currentRole === 'student' 
+          ? 'Switch to Coach to see student management tools'
+          : 'Switch to Student to see character development features'
+        }
+      </Text>
     </View>
   );
 }
@@ -33,6 +53,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'rgba(255, 255, 255, 0.8)',
   },
+  roleHighlight: {
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
   switchButton: {
     backgroundColor: '#4ECDC4',
     paddingHorizontal: 16,
@@ -43,5 +67,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#FFFFFF',
+  },
+  description: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.6)',
+    textAlign: 'center',
+    lineHeight: 16,
   },
 });

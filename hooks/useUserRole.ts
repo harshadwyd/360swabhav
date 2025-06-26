@@ -9,10 +9,12 @@ export function useUserRole(): UserRole {
 
   useEffect(() => {
     // In a real app, this would check authentication state
-    // For demo, you can manually set the role here
-    const savedRole = localStorage?.getItem('userRole') as UserRole;
-    if (savedRole) {
-      setRole(savedRole);
+    // For demo, check localStorage for saved role
+    if (typeof window !== 'undefined') {
+      const savedRole = localStorage.getItem('userRole') as UserRole;
+      if (savedRole && (savedRole === 'student' || savedRole === 'coach')) {
+        setRole(savedRole);
+      }
     }
   }, []);
 
@@ -23,6 +25,8 @@ export function useUserRole(): UserRole {
 export function switchUserRole(newRole: UserRole) {
   if (typeof window !== 'undefined') {
     localStorage.setItem('userRole', newRole);
+    // Force a re-render by dispatching a custom event
+    window.dispatchEvent(new CustomEvent('roleChanged'));
     window.location.reload(); // Simple way to refresh navigation
   }
 }
