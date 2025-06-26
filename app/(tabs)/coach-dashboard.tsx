@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Users, TrendingUp, TriangleAlert as AlertTriangle, Trophy, MessageCircle, Calendar, Target, Star, ChevronRight, Bell, Award } from 'lucide-react-native';
+import { Users, TrendingUp, TriangleAlert as AlertTriangle, Trophy, MessageCircle, Calendar, Target, Star, ChevronRight, Bell, Award, Plus, Settings } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
@@ -27,7 +28,15 @@ interface CoachMetric {
 }
 
 export default function CoachDashboard() {
+  const router = useRouter();
   const [selectedTab, setSelectedTab] = useState('overview');
+  const [dailyTasks, setDailyTasks] = useState([
+    { id: 1, task: 'Send daily motivation to all students', completed: true, xp: 10 },
+    { id: 2, task: 'Review struggling students progress', completed: false, xp: 25 },
+    { id: 3, task: 'Respond to student messages', completed: true, xp: 15 },
+    { id: 4, task: 'Update coaching notes', completed: false, xp: 20 },
+    { id: 5, task: 'Plan tomorrow\'s check-ins', completed: false, xp: 15 },
+  ]);
   
   const coachStats = {
     totalStudents: 24,
@@ -118,25 +127,19 @@ export default function CoachDashboard() {
 
   const urgentAlerts = [
     {
+      id: 1,
       student: 'Alex Thompson',
       issue: 'No activity for 3 days',
       priority: 'high',
       action: 'Send check-in message',
     },
     {
+      id: 2,
       student: 'Mike Johnson',
       issue: 'Completion rate dropped 20%',
       priority: 'medium',
       action: 'Schedule 1-on-1 session',
     },
-  ];
-
-  const dailyTasks = [
-    { task: 'Send daily motivation to all students', completed: true, xp: 10 },
-    { task: 'Review struggling students progress', completed: false, xp: 25 },
-    { task: 'Respond to student messages', completed: true, xp: 15 },
-    { task: 'Update coaching notes', completed: false, xp: 20 },
-    { task: 'Plan tomorrow\'s check-ins', completed: false, xp: 15 },
   ];
 
   const getStatusColor = (status: string) => {
@@ -148,33 +151,171 @@ export default function CoachDashboard() {
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'thriving': return '🌟';
-      case 'needs-attention': return '⚠️';
-      case 'struggling': return '🚨';
-      default: return '⭐';
-    }
-  };
-
   const handleStudentPress = (student: Student) => {
     Alert.alert(
       `${student.name} - Level ${student.level}`,
       `Streak: ${student.streak} days\nCompletion Rate: ${student.completionRate}%\nLast Active: ${student.lastActive}`,
       [
-        { text: 'View Profile', onPress: () => console.log('View profile') },
-        { text: 'Send Message', onPress: () => console.log('Send message') },
+        { text: 'View Profile', onPress: () => router.push('/students') },
+        { text: 'Send Message', onPress: () => handleSendMessage(student) },
+        { text: 'Schedule Session', onPress: () => handleScheduleSession(student) },
         { text: 'Cancel', style: 'cancel' },
       ]
     );
   };
 
-  const handleTaskToggle = (index: number) => {
-    // Toggle task completion and award XP
-    const task = dailyTasks[index];
-    if (!task.completed) {
-      Alert.alert('Task Complete!', `You earned ${task.xp} XP for completing: ${task.task}`);
+  const handleTaskToggle = (taskId: number) => {
+    setDailyTasks(prev => prev.map(task => {
+      if (task.id === taskId) {
+        const newCompleted = !task.completed;
+        if (newCompleted) {
+          Alert.alert('Task Complete!', `You earned ${task.xp} XP for completing: ${task.task}`);
+        }
+        return { ...task, completed: newCompleted };
+      }
+      return task;
+    }));
+  };
+
+  const handleAlertAction = (alert: any) => {
+    Alert.alert(
+      'Take Action',
+      `${alert.action} for ${alert.student}?`,
+      [
+        { text: 'Send Message', onPress: () => handleSendQuickMessage(alert.student) },
+        { text: 'Schedule Session', onPress: () => handleQuickSchedule(alert.student) },
+        { text: 'Mark Resolved', onPress: () => console.log('Alert resolved') },
+        { text: 'Cancel', style: 'cancel' },
+      ]
+    );
+  };
+
+  const handleSendMessage = (student: Student) => {
+    Alert.alert(
+      'Send Message',
+      `Send a message to ${student.name}?`,
+      [
+        { text: 'Quick Encouragement', onPress: () => sendQuickMessage(student, 'encouragement') },
+        { text: 'Check-in Message', onPress: () => sendQuickMessage(student, 'checkin') },
+        { text: 'Custom Message', onPress: () => router.push('/tools') },
+        { text: 'Cancel', style: 'cancel' },
+      ]
+    );
+  };
+
+  const handleScheduleSession = (student: Student) => {
+    Alert.alert(
+      'Schedule Session',
+      `Schedule a 1-on-1 session with ${student.name}?`,
+      [
+        { text: 'This Week', onPress: () => scheduleSession(student, 'this-week') },
+        { text: 'Next Week', onPress: () => scheduleSession(student, 'next-week') },
+        { text: 'Emergency Session', onPress: () => scheduleSession(student, 'emergency') },
+        { text: 'Cancel', style: 'cancel' },
+      ]
+    );
+  };
+
+  const sendQuickMessage = (student: Student, type: string) => {
+    const messages = {
+      encouragement: `Great job on your progress, ${student.name}! Keep up the amazing work! 🌟`,
+      checkin: `Hi ${student.name}, just checking in on how you're doing. I'm here to support you! 💪`,
+    };
+    
+    Alert.alert(
+      'Message Sent!',
+      `Sent to ${student.name}: "${messages[type as keyof typeof messages]}"`
+    );
+  };
+
+  const scheduleSession = (student: Student, timing: string) => {
+    const timingText = {
+      'this-week': 'this week',
+      'next-week': 'next week',
+      'emergency': 'as an emergency session today',
+    };
+    
+    Alert.alert(
+      'Session Scheduled!',
+      `1-on-1 session with ${student.name} scheduled for ${timingText[timing as keyof typeof timingText]}.`
+    );
+  };
+
+  const handleSendQuickMessage = (studentName: string) => {
+    Alert.alert('Message Sent!', `Quick check-in message sent to ${studentName}.`);
+  };
+
+  const handleQuickSchedule = (studentName: string) => {
+    Alert.alert('Session Scheduled!', `Emergency session scheduled with ${studentName} for today.`);
+  };
+
+  const handleQuickAction = (action: string) => {
+    switch (action) {
+      case 'bulk-message':
+        router.push('/tools');
+        break;
+      case 'schedule-sessions':
+        Alert.alert(
+          'Schedule Sessions',
+          'What type of sessions would you like to schedule?',
+          [
+            { text: 'Group Session', onPress: () => Alert.alert('Success!', 'Group session scheduled for this Friday.') },
+            { text: 'Individual Sessions', onPress: () => Alert.alert('Success!', 'Individual sessions scheduled for struggling students.') },
+            { text: 'Cancel', style: 'cancel' },
+          ]
+        );
+        break;
+      case 'create-challenge':
+        Alert.alert(
+          'Create Challenge',
+          'What type of challenge would you like to create?',
+          [
+            { text: '7-Day Streak Challenge', onPress: () => Alert.alert('Challenge Created!', '7-Day Streak Challenge is now live for all students.') },
+            { text: 'Team Building Challenge', onPress: () => Alert.alert('Challenge Created!', 'Team Building Challenge created successfully.') },
+            { text: 'Custom Challenge', onPress: () => router.push('/tools') },
+            { text: 'Cancel', style: 'cancel' },
+          ]
+        );
+        break;
+      case 'award-badge':
+        Alert.alert(
+          'Award Badge',
+          'Which badge would you like to award?',
+          [
+            { text: 'Most Improved', onPress: () => Alert.alert('Badge Awarded!', 'Most Improved badge awarded to top performer.') },
+            { text: 'Consistency Champion', onPress: () => Alert.alert('Badge Awarded!', 'Consistency Champion badge awarded.') },
+            { text: 'Custom Badge', onPress: () => router.push('/tools') },
+            { text: 'Cancel', style: 'cancel' },
+          ]
+        );
+        break;
+      default:
+        console.log('Unknown action:', action);
     }
+  };
+
+  const handleNotificationPress = () => {
+    Alert.alert(
+      'Notifications',
+      'You have 3 new notifications:',
+      [
+        { text: 'View All', onPress: () => console.log('View all notifications') },
+        { text: 'Mark Read', onPress: () => console.log('Mark all as read') },
+        { text: 'Close', style: 'cancel' },
+      ]
+    );
+  };
+
+  const handleMetricPress = (metric: CoachMetric) => {
+    Alert.alert(
+      metric.title,
+      `Current: ${metric.value}\nChange: ${metric.change}\n\nWould you like to view detailed analytics?`,
+      [
+        { text: 'View Details', onPress: () => router.push('/coach-analytics') },
+        { text: 'Export Report', onPress: () => Alert.alert('Report Exported!', 'Analytics report has been exported to your downloads.') },
+        { text: 'Close', style: 'cancel' },
+      ]
+    );
   };
 
   return (
@@ -189,7 +330,7 @@ export default function CoachDashboard() {
             <Text style={styles.greeting}>Good Morning, Coach!</Text>
             <Text style={styles.coachName}>Level {coachStats.coachLevel} Mentor • {coachStats.coachXP} XP</Text>
           </View>
-          <TouchableOpacity style={styles.notificationButton}>
+          <TouchableOpacity style={styles.notificationButton} onPress={handleNotificationPress}>
             <Bell size={24} color="#FFFFFF" />
             <View style={styles.notificationBadge}>
               <Text style={styles.notificationCount}>3</Text>
@@ -198,18 +339,18 @@ export default function CoachDashboard() {
         </View>
         
         <View style={styles.quickStats}>
-          <View style={styles.statItem}>
+          <TouchableOpacity style={styles.statItem} onPress={() => router.push('/students')}>
             <Text style={styles.statValue}>{coachStats.totalStudents}</Text>
             <Text style={styles.statLabel}>Total Students</Text>
-          </View>
-          <View style={styles.statItem}>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.statItem} onPress={() => router.push('/students')}>
             <Text style={styles.statValue}>{coachStats.activeToday}</Text>
             <Text style={styles.statLabel}>Active Today</Text>
-          </View>
-          <View style={styles.statItem}>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.statItem} onPress={() => router.push('/coach-analytics')}>
             <Text style={styles.statValue}>{coachStats.completedGoals}/{coachStats.weeklyGoals}</Text>
             <Text style={styles.statLabel}>Weekly Goals</Text>
-          </View>
+          </TouchableOpacity>
         </View>
       </LinearGradient>
 
@@ -219,8 +360,13 @@ export default function CoachDashboard() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>🚨 Urgent Alerts</Text>
             <View style={styles.alertsContainer}>
-              {urgentAlerts.map((alert, index) => (
-                <TouchableOpacity key={index} style={styles.alertCard} activeOpacity={0.8}>
+              {urgentAlerts.map((alert) => (
+                <TouchableOpacity 
+                  key={alert.id} 
+                  style={styles.alertCard} 
+                  onPress={() => handleAlertAction(alert)}
+                  activeOpacity={0.8}
+                >
                   <View style={styles.alertHeader}>
                     <AlertTriangle size={20} color="#FF6B6B" />
                     <Text style={styles.alertStudent}>{alert.student}</Text>
@@ -242,7 +388,12 @@ export default function CoachDashboard() {
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.metricsContainer}>
               {coachMetrics.map((metric, index) => (
-                <TouchableOpacity key={index} style={styles.metricCard} activeOpacity={0.8}>
+                <TouchableOpacity 
+                  key={index} 
+                  style={styles.metricCard} 
+                  onPress={() => handleMetricPress(metric)}
+                  activeOpacity={0.8}
+                >
                   <LinearGradient
                     colors={[metric.color + '20', metric.color + '10']}
                     style={styles.metricGradient}
@@ -266,11 +417,11 @@ export default function CoachDashboard() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>✅ Daily Coaching Tasks</Text>
           <View style={styles.tasksContainer}>
-            {dailyTasks.map((task, index) => (
+            {dailyTasks.map((task) => (
               <TouchableOpacity
-                key={index}
+                key={task.id}
                 style={[styles.taskCard, task.completed && styles.completedTask]}
-                onPress={() => handleTaskToggle(index)}
+                onPress={() => handleTaskToggle(task.id)}
                 activeOpacity={0.8}
               >
                 <View style={styles.taskContent}>
@@ -291,7 +442,7 @@ export default function CoachDashboard() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>👥 My Students</Text>
-            <TouchableOpacity style={styles.viewAllButton}>
+            <TouchableOpacity style={styles.viewAllButton} onPress={() => router.push('/students')}>
               <Text style={styles.viewAllText}>View All</Text>
               <ChevronRight size={16} color="#4ECDC4" />
             </TouchableOpacity>
@@ -327,10 +478,16 @@ export default function CoachDashboard() {
                 <Text style={styles.lastActive}>{student.lastActive}</Text>
                 
                 <View style={styles.studentActions}>
-                  <TouchableOpacity style={styles.actionButton}>
+                  <TouchableOpacity 
+                    style={styles.actionButton}
+                    onPress={() => handleSendMessage(student)}
+                  >
                     <MessageCircle size={16} color="#4ECDC4" />
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.actionButton}>
+                  <TouchableOpacity 
+                    style={styles.actionButton}
+                    onPress={() => handleScheduleSession(student)}
+                  >
                     <Calendar size={16} color="#FFB347" />
                   </TouchableOpacity>
                 </View>
@@ -343,28 +500,44 @@ export default function CoachDashboard() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>⚡ Quick Actions</Text>
           <View style={styles.quickActionsGrid}>
-            <TouchableOpacity style={styles.quickActionCard} activeOpacity={0.8}>
+            <TouchableOpacity 
+              style={styles.quickActionCard} 
+              onPress={() => handleQuickAction('bulk-message')}
+              activeOpacity={0.8}
+            >
               <LinearGradient colors={['#4ECDC4', '#44A08D']} style={styles.quickActionGradient}>
                 <MessageCircle size={24} color="#FFFFFF" />
                 <Text style={styles.quickActionText}>Send Bulk Message</Text>
               </LinearGradient>
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.quickActionCard} activeOpacity={0.8}>
+            <TouchableOpacity 
+              style={styles.quickActionCard} 
+              onPress={() => handleQuickAction('schedule-sessions')}
+              activeOpacity={0.8}
+            >
               <LinearGradient colors={['#FF6B6B', '#FF8E53']} style={styles.quickActionGradient}>
                 <Calendar size={24} color="#FFFFFF" />
                 <Text style={styles.quickActionText}>Schedule Sessions</Text>
               </LinearGradient>
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.quickActionCard} activeOpacity={0.8}>
+            <TouchableOpacity 
+              style={styles.quickActionCard} 
+              onPress={() => handleQuickAction('create-challenge')}
+              activeOpacity={0.8}
+            >
               <LinearGradient colors={['#9B59B6', '#8E44AD']} style={styles.quickActionGradient}>
                 <Trophy size={24} color="#FFFFFF" />
                 <Text style={styles.quickActionText}>Create Challenge</Text>
               </LinearGradient>
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.quickActionCard} activeOpacity={0.8}>
+            <TouchableOpacity 
+              style={styles.quickActionCard} 
+              onPress={() => handleQuickAction('award-badge')}
+              activeOpacity={0.8}
+            >
               <LinearGradient colors={['#FFB347', '#FF8C42']} style={styles.quickActionGradient}>
                 <Award size={24} color="#FFFFFF" />
                 <Text style={styles.quickActionText}>Award Badge</Text>
@@ -372,6 +545,27 @@ export default function CoachDashboard() {
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* Add Student Button */}
+        <TouchableOpacity 
+          style={styles.addStudentButton}
+          onPress={() => Alert.alert(
+            'Add Student',
+            'How would you like to add a new student?',
+            [
+              { text: 'Send Invitation', onPress: () => Alert.alert('Invitation Sent!', 'Student invitation has been sent via email.') },
+              { text: 'Generate Code', onPress: () => Alert.alert('Code Generated!', 'Student can join using code: COACH2024') },
+              { text: 'Manual Entry', onPress: () => Alert.alert('Manual Entry', 'Manual student entry form opened.') },
+              { text: 'Cancel', style: 'cancel' },
+            ]
+          )}
+          activeOpacity={0.8}
+        >
+          <LinearGradient colors={['#667eea', '#764ba2']} style={styles.addStudentGradient}>
+            <Plus size={20} color="#FFFFFF" />
+            <Text style={styles.addStudentText}>Add New Student</Text>
+          </LinearGradient>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -431,6 +625,8 @@ const styles = StyleSheet.create({
   },
   statItem: {
     alignItems: 'center',
+    padding: 8,
+    borderRadius: 8,
   },
   statValue: {
     fontSize: 24,
@@ -717,5 +913,22 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
     textAlign: 'center',
+  },
+  addStudentButton: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 32,
+  },
+  addStudentGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    gap: 8,
+  },
+  addStudentText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 });

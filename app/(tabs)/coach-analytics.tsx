@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { TrendingUp, Users, Target, Award, Calendar, ChartBar as BarChart3, ChartPie as PieChart, Clock, Star } from 'lucide-react-native';
+import { TrendingUp, Users, Target, Award, Calendar, ChartBar as BarChart3, ChartPie as PieChart, Clock, Star, Download, Share2, Bell, Printer, FileText, Mail } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
 export default function CoachAnalytics() {
+  const router = useRouter();
   const [selectedPeriod, setSelectedPeriod] = useState('Month');
   const [selectedMetric, setSelectedMetric] = useState('retention');
 
@@ -76,18 +78,21 @@ export default function CoachAnalytics() {
 
   const achievements = [
     {
+      id: 1,
       title: 'Mentor Master',
       description: 'Guided 10+ students to next level',
       earned: true,
       rarity: 'epic',
     },
     {
+      id: 2,
       title: 'Streak Keeper',
       description: 'Helped students maintain 30+ day streaks',
       earned: true,
       rarity: 'rare',
     },
     {
+      id: 3,
       title: 'Turnaround Specialist',
       description: 'Helped 5 struggling students recover',
       earned: false,
@@ -98,18 +103,21 @@ export default function CoachAnalytics() {
 
   const insights = [
     {
+      id: 1,
       title: 'Peak Coaching Hours',
       description: 'Your students are most responsive between 6-8 PM',
       icon: Clock,
       color: '#4ECDC4',
     },
     {
+      id: 2,
       title: 'Intervention Success',
       description: 'Your early interventions have 94% success rate',
       icon: Target,
       color: '#00ff88',
     },
     {
+      id: 3,
       title: 'Student Growth',
       description: 'Students advance 40% faster under your guidance',
       icon: TrendingUp,
@@ -125,6 +133,98 @@ export default function CoachAnalytics() {
     }
   };
 
+  const handlePeriodChange = (period: string) => {
+    setSelectedPeriod(period);
+    Alert.alert('Period Changed', `Analytics now showing data for: ${period}`);
+  };
+
+  const handleMetricSelect = (metricId: string) => {
+    setSelectedMetric(metricId);
+    const metric = coachingMetrics.find(m => m.id === metricId);
+    if (metric) {
+      Alert.alert(
+        `${metric.title} Details`,
+        `Current Value: ${metric.value}\nChange: ${metric.change}\n\n${metric.description}`,
+        [
+          { text: 'View Detailed Report', onPress: () => Alert.alert('Report Generated', `Detailed report for ${metric.title} has been generated.`) },
+          { text: 'Close', style: 'cancel' },
+        ]
+      );
+    }
+  };
+
+  const handleExportData = () => {
+    Alert.alert(
+      'Export Data',
+      'Choose export format:',
+      [
+        { text: 'PDF Report', onPress: () => Alert.alert('PDF Generated', 'Your analytics report has been exported as PDF.') },
+        { text: 'Excel Spreadsheet', onPress: () => Alert.alert('Excel Generated', 'Your analytics data has been exported as Excel file.') },
+        { text: 'Cancel', style: 'cancel' },
+      ]
+    );
+  };
+
+  const handleShareInsights = () => {
+    Alert.alert(
+      'Share Insights',
+      'Share these analytics with:',
+      [
+        { text: 'Other Coaches', onPress: () => Alert.alert('Shared with Coaches', 'Analytics insights shared with other coaches.') },
+        { text: 'Program Administrators', onPress: () => Alert.alert('Shared with Admins', 'Analytics insights shared with program administrators.') },
+        { text: 'Cancel', style: 'cancel' },
+      ]
+    );
+  };
+
+  const handleScheduleReport = () => {
+    Alert.alert(
+      'Schedule Regular Report',
+      'How often would you like to receive this report?',
+      [
+        { text: 'Weekly', onPress: () => Alert.alert('Weekly Report Scheduled', 'You will receive this report every Monday.') },
+        { text: 'Monthly', onPress: () => Alert.alert('Monthly Report Scheduled', 'You will receive this report on the 1st of each month.') },
+        { text: 'Quarterly', onPress: () => Alert.alert('Quarterly Report Scheduled', 'You will receive this report every quarter.') },
+        { text: 'Cancel', style: 'cancel' },
+      ]
+    );
+  };
+
+  const handleChartInteraction = (chartType: string) => {
+    Alert.alert(
+      `${chartType} Chart`,
+      'What would you like to do with this chart?',
+      [
+        { text: 'View Full Screen', onPress: () => Alert.alert('Full Screen View', `${chartType} chart opened in full screen.`) },
+        { text: 'Export Image', onPress: () => Alert.alert('Chart Exported', `${chartType} chart has been exported as image.`) },
+        { text: 'Customize', onPress: () => Alert.alert('Customize Chart', `${chartType} chart customization options opened.`) },
+        { text: 'Cancel', style: 'cancel' },
+      ]
+    );
+  };
+
+  const handleAchievementPress = (achievement: any) => {
+    Alert.alert(
+      achievement.title,
+      `${achievement.description}\n\nRarity: ${achievement.rarity.toUpperCase()}`,
+      achievement.earned 
+        ? [{ text: 'View Certificate', onPress: () => Alert.alert('Certificate', 'Achievement certificate opened.') }, { text: 'Close', style: 'cancel' }]
+        : [{ text: 'View Progress', onPress: () => Alert.alert('Progress', `You're ${achievement.progress}% of the way to earning this achievement.`) }, { text: 'Close', style: 'cancel' }]
+    );
+  };
+
+  const handleInsightPress = (insight: any) => {
+    Alert.alert(
+      insight.title,
+      insight.description,
+      [
+        { text: 'View Detailed Analysis', onPress: () => Alert.alert('Analysis', 'Detailed analysis opened.') },
+        { text: 'Take Action', onPress: () => Alert.alert('Action Plan', 'Action plan based on this insight has been created.') },
+        { text: 'Close', style: 'cancel' },
+      ]
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -132,8 +232,32 @@ export default function CoachAnalytics() {
         colors={['#667eea', '#764ba2']}
         style={styles.header}
       >
-        <Text style={styles.headerTitle}>Coaching Analytics</Text>
-        <Text style={styles.headerSubtitle}>Track your impact and effectiveness</Text>
+        <View style={styles.headerContent}>
+          <View>
+            <Text style={styles.headerTitle}>Coaching Analytics</Text>
+            <Text style={styles.headerSubtitle}>Track your impact and effectiveness</Text>
+          </View>
+          <View style={styles.headerActions}>
+            <TouchableOpacity 
+              style={styles.headerActionButton}
+              onPress={handleExportData}
+            >
+              <Download size={20} color="#FFFFFF" />
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.headerActionButton}
+              onPress={handleShareInsights}
+            >
+              <Share2 size={20} color="#FFFFFF" />
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.headerActionButton}
+              onPress={() => Alert.alert('Notifications', 'Analytics notifications settings opened.')}
+            >
+              <Bell size={20} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
+        </View>
       </LinearGradient>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -148,7 +272,7 @@ export default function CoachAnalytics() {
                     styles.periodButton,
                     selectedPeriod === period && styles.selectedPeriod
                   ]}
-                  onPress={() => setSelectedPeriod(period)}
+                  onPress={() => handlePeriodChange(period)}
                 >
                   <Text style={[
                     styles.periodText,
@@ -162,6 +286,49 @@ export default function CoachAnalytics() {
           </ScrollView>
         </View>
 
+        {/* Quick Actions */}
+        <View style={styles.quickActions}>
+          <TouchableOpacity 
+            style={styles.quickActionButton}
+            onPress={handleExportData}
+          >
+            <Download size={20} color="#4ECDC4" />
+            <Text style={styles.quickActionText}>Export</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.quickActionButton}
+            onPress={handleShareInsights}
+          >
+            <Share2 size={20} color="#FF6B6B" />
+            <Text style={styles.quickActionText}>Share</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.quickActionButton}
+            onPress={handleScheduleReport}
+          >
+            <Calendar size={20} color="#FFB347" />
+            <Text style={styles.quickActionText}>Schedule</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.quickActionButton}
+            onPress={() => Alert.alert('Print Report', 'Preparing analytics report for printing...')}
+          >
+            <Printer size={20} color="#9B59B6" />
+            <Text style={styles.quickActionText}>Print</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.quickActionButton}
+            onPress={() => Alert.alert('Email Report', 'Send this analytics report via email to yourself or others.')}
+          >
+            <Mail size={20} color="#45B7D1" />
+            <Text style={styles.quickActionText}>Email</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Key Metrics */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>📊 Key Performance Metrics</Text>
@@ -173,7 +340,7 @@ export default function CoachAnalytics() {
                   styles.metricCard,
                   selectedMetric === metric.id && styles.selectedMetricCard
                 ]}
-                onPress={() => setSelectedMetric(metric.id)}
+                onPress={() => handleMetricSelect(metric.id)}
                 activeOpacity={0.8}
               >
                 <LinearGradient
@@ -198,8 +365,20 @@ export default function CoachAnalytics() {
 
         {/* Weekly Activity Chart */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>📈 Weekly Activity Overview</Text>
-          <View style={styles.chartCard}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>📈 Weekly Activity Overview</Text>
+            <TouchableOpacity 
+              style={styles.sectionAction}
+              onPress={() => handleChartInteraction('Weekly Activity')}
+            >
+              <Text style={styles.sectionActionText}>Expand</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity 
+            style={styles.chartCard}
+            onPress={() => handleChartInteraction('Weekly Activity')}
+            activeOpacity={0.8}
+          >
             <View style={styles.chartLegend}>
               <View style={styles.legendItem}>
                 <View style={[styles.legendDot, { backgroundColor: '#4ECDC4' }]} />
@@ -253,13 +432,25 @@ export default function CoachAnalytics() {
                 ))}
               </View>
             </ScrollView>
-          </View>
+          </TouchableOpacity>
         </View>
 
         {/* Student Distribution */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>👥 Student Level Distribution</Text>
-          <View style={styles.distributionCard}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>👥 Student Level Distribution</Text>
+            <TouchableOpacity 
+              style={styles.sectionAction}
+              onPress={() => handleChartInteraction('Student Distribution')}
+            >
+              <Text style={styles.sectionActionText}>Expand</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity 
+            style={styles.distributionCard}
+            onPress={() => handleChartInteraction('Student Distribution')}
+            activeOpacity={0.8}
+          >
             <View style={styles.distributionChart}>
               <PieChart size={80} color="#4ECDC4" />
               <Text style={styles.chartCenterText}>24 Students</Text>
@@ -275,13 +466,25 @@ export default function CoachAnalytics() {
                 </View>
               ))}
             </View>
-          </View>
+          </TouchableOpacity>
         </View>
 
         {/* Intervention Effectiveness */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🎯 Intervention Effectiveness</Text>
-          <View style={styles.interventionCard}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>🎯 Intervention Effectiveness</Text>
+            <TouchableOpacity 
+              style={styles.sectionAction}
+              onPress={() => handleChartInteraction('Intervention Effectiveness')}
+            >
+              <Text style={styles.sectionActionText}>Expand</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity 
+            style={styles.interventionCard}
+            onPress={() => handleChartInteraction('Intervention Effectiveness')}
+            activeOpacity={0.8}
+          >
             {interventionData.map((intervention, index) => (
               <View key={index} style={styles.interventionItem}>
                 <View style={styles.interventionHeader}>
@@ -305,15 +508,20 @@ export default function CoachAnalytics() {
                 </View>
               </View>
             ))}
-          </View>
+          </TouchableOpacity>
         </View>
 
         {/* Coach Achievements */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>🏆 Your Coaching Achievements</Text>
           <View style={styles.achievementsContainer}>
-            {achievements.map((achievement, index) => (
-              <View key={index} style={[styles.achievementCard, !achievement.earned && styles.lockedAchievement]}>
+            {achievements.map((achievement) => (
+              <TouchableOpacity
+                key={achievement.id}
+                style={[styles.achievementCard, !achievement.earned && styles.lockedAchievement]}
+                onPress={() => handleAchievementPress(achievement)}
+                activeOpacity={0.8}
+              >
                 <View style={styles.achievementHeader}>
                   <Award size={24} color={achievement.earned ? '#FFD700' : '#999'} />
                   <View style={[
@@ -338,7 +546,7 @@ export default function CoachAnalytics() {
                     <Text style={styles.progressText}>{achievement.progress}% complete</Text>
                   </View>
                 )}
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         </View>
@@ -347,8 +555,13 @@ export default function CoachAnalytics() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>💡 Smart Insights</Text>
           <View style={styles.insightsContainer}>
-            {insights.map((insight, index) => (
-              <View key={index} style={styles.insightCard}>
+            {insights.map((insight) => (
+              <TouchableOpacity
+                key={insight.id}
+                style={styles.insightCard}
+                onPress={() => handleInsightPress(insight)}
+                activeOpacity={0.8}
+              >
                 <View style={[styles.insightIcon, { backgroundColor: insight.color + '20' }]}>
                   <insight.icon size={24} color={insight.color} />
                 </View>
@@ -356,10 +569,21 @@ export default function CoachAnalytics() {
                   <Text style={styles.insightTitle}>{insight.title}</Text>
                   <Text style={styles.insightDescription}>{insight.description}</Text>
                 </View>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         </View>
+
+        {/* Generate Report Button */}
+        <TouchableOpacity 
+          style={styles.generateReportButton}
+          onPress={() => router.push('/tools')}
+        >
+          <LinearGradient colors={['#667eea', '#764ba2']} style={styles.generateReportGradient}>
+            <FileText size={20} color="#FFFFFF" />
+            <Text style={styles.generateReportText}>Generate Comprehensive Report</Text>
+          </LinearGradient>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -374,6 +598,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 24,
   },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
   headerTitle: {
     fontSize: 28,
     fontWeight: '800',
@@ -384,13 +613,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'rgba(255, 255, 255, 0.8)',
   },
+  headerActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  headerActionButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   content: {
     flex: 1,
     paddingHorizontal: 24,
     marginTop: -10,
   },
   periodSelector: {
-    marginBottom: 24,
+    marginBottom: 16,
   },
   periodButtons: {
     flexDirection: 'row',
@@ -416,14 +657,53 @@ const styles = StyleSheet.create({
   selectedPeriodText: {
     color: '#FFFFFF',
   },
+  quickActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  quickActionButton: {
+    alignItems: 'center',
+    gap: 4,
+  },
+  quickActionText: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '500',
+  },
   section: {
     marginBottom: 28,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
     color: '#1a1a1a',
     marginBottom: 16,
+  },
+  sectionAction: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+  },
+  sectionActionText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#4ECDC4',
   },
   metricsGrid: {
     flexDirection: 'row',
@@ -728,5 +1008,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     lineHeight: 20,
+  },
+  generateReportButton: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 32,
+  },
+  generateReportGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    gap: 8,
+  },
+  generateReportText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 });

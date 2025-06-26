@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Search, Filter, Users, TrendingUp, MessageCircle, Calendar, Trophy, Target, Star, ChevronRight, TriangleAlert as AlertTriangle } from 'lucide-react-native';
+import { Search, Filter, Users, TrendingUp, MessageCircle, Calendar, Trophy, Target, Star, ChevronRight, TriangleAlert as AlertTriangle, Plus, Download, Upload, SlidersHorizontal } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
@@ -23,9 +24,12 @@ interface Student {
 }
 
 export default function StudentsScreen() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
+  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
 
   const students: Student[] = [
     {
@@ -154,7 +158,26 @@ export default function StudentsScreen() {
   });
 
   const handleStudentPress = (student: Student) => {
-    setSelectedStudent(student);
+    if (isMultiSelectMode) {
+      toggleStudentSelection(student.id);
+    } else {
+      setSelectedStudent(student);
+    }
+  };
+
+  const toggleStudentSelection = (studentId: string) => {
+    setSelectedStudents(prev => 
+      prev.includes(studentId) 
+        ? prev.filter(id => id !== studentId)
+        : [...prev, studentId]
+    );
+  };
+
+  const toggleMultiSelectMode = () => {
+    setIsMultiSelectMode(!isMultiSelectMode);
+    if (isMultiSelectMode) {
+      setSelectedStudents([]);
+    }
   };
 
   const handleSendMessage = (student: Student) => {
@@ -162,8 +185,9 @@ export default function StudentsScreen() {
       'Send Message',
       `Send a message to ${student.name}?`,
       [
-        { text: 'Quick Encouragement', onPress: () => console.log('Quick message sent') },
-        { text: 'Custom Message', onPress: () => console.log('Open message composer') },
+        { text: 'Quick Encouragement', onPress: () => sendQuickMessage(student, 'encouragement') },
+        { text: 'Check-in Message', onPress: () => sendQuickMessage(student, 'checkin') },
+        { text: 'Custom Message', onPress: () => router.push('/tools') },
         { text: 'Cancel', style: 'cancel' },
       ]
     );
@@ -174,8 +198,101 @@ export default function StudentsScreen() {
       'Schedule Session',
       `Schedule a 1-on-1 session with ${student.name}?`,
       [
-        { text: 'This Week', onPress: () => console.log('Schedule this week') },
-        { text: 'Next Week', onPress: () => console.log('Schedule next week') },
+        { text: 'This Week', onPress: () => scheduleSession(student, 'this-week') },
+        { text: 'Next Week', onPress: () => scheduleSession(student, 'next-week') },
+        { text: 'Emergency Session', onPress: () => scheduleSession(student, 'emergency') },
+        { text: 'Cancel', style: 'cancel' },
+      ]
+    );
+  };
+
+  const sendQuickMessage = (student: Student, type: string) => {
+    const messages = {
+      encouragement: `Great job on your progress, ${student.name}! Keep up the amazing work! 🌟`,
+      checkin: `Hi ${student.name}, just checking in on how you're doing. I'm here to support you! 💪`,
+    };
+    
+    Alert.alert(
+      'Message Sent!',
+      `Sent to ${student.name}: "${messages[type as keyof typeof messages]}"`
+    );
+  };
+
+  const scheduleSession = (student: Student, timing: string) => {
+    const timingText = {
+      'this-week': 'this week',
+      'next-week': 'next week',
+      'emergency': 'as an emergency session today',
+    };
+    
+    Alert.alert(
+      'Session Scheduled!',
+      `1-on-1 session with ${student.name} scheduled for ${timingText[timing as keyof typeof timingText]}.`
+    );
+  };
+
+  const handleBulkAction = (action: string) => {
+    if (selectedStudents.length === 0) {
+      Alert.alert('No Students Selected', 'Please select at least one student to perform this action.');
+      return;
+    }
+
+    const selectedStudentNames = selectedStudents.map(id => 
+      students.find(s => s.id === id)?.name
+    ).join(', ');
+
+    switch (action) {
+      case 'message':
+        Alert.alert(
+          'Send Bulk Message',
+          `Send a message to ${selectedStudents.length} students: ${selectedStudentNames}?`,
+          [
+            { text: 'Quick Encouragement', onPress: () => Alert.alert('Messages Sent!', `Encouragement messages sent to ${selectedStudents.length} students.`) },
+            { text: 'Custom Message', onPress: () => router.push('/tools') },
+            { text: 'Cancel', style: 'cancel' },
+          ]
+        );
+        break;
+      case 'challenge':
+        Alert.alert(
+          'Create Group Challenge',
+          `Create a challenge for ${selectedStudents.length} students?`,
+          [
+            { text: 'Weekly Challenge', onPress: () => Alert.alert('Challenge Created!', `Weekly challenge assigned to ${selectedStudents.length} students.`) },
+            { text: 'Custom Challenge', onPress: () => router.push('/tools') },
+            { text: 'Cancel', style: 'cancel' },
+          ]
+        );
+        break;
+      case 'export':
+        Alert.alert('Data Exported!', `Progress data for ${selectedStudents.length} students has been exported.`);
+        break;
+      default:
+        console.log('Unknown bulk action:', action);
+    }
+  };
+
+  const handleAddStudent = () => {
+    Alert.alert(
+      'Add New Student',
+      'How would you like to add a new student?',
+      [
+        { text: 'Send Invitation', onPress: () => Alert.alert('Invitation Sent!', 'Student invitation has been sent via email.') },
+        { text: 'Generate Code', onPress: () => Alert.alert('Code Generated!', 'Student can join using code: COACH2024') },
+        { text: 'Manual Entry', onPress: () => Alert.alert('Manual Entry', 'Manual student entry form opened.') },
+        { text: 'Cancel', style: 'cancel' },
+      ]
+    );
+  };
+
+  const handleAdvancedFilters = () => {
+    Alert.alert(
+      'Advanced Filters',
+      'Filter students by:',
+      [
+        { text: 'Activity Level', onPress: () => setSelectedFilter('all') },
+        { text: 'Progress Rate', onPress: () => setSelectedFilter('all') },
+        { text: 'Goal Completion', onPress: () => setSelectedFilter('all') },
         { text: 'Cancel', style: 'cancel' },
       ]
     );
@@ -270,6 +387,34 @@ export default function StudentsScreen() {
                 </LinearGradient>
               </TouchableOpacity>
             </View>
+
+            <View style={styles.detailActions}>
+              <TouchableOpacity 
+                style={styles.detailActionButton}
+                onPress={() => {
+                  setSelectedStudent(null);
+                  Alert.alert('Analytics Opened', `Viewing detailed analytics for ${selectedStudent.name}`);
+                }}
+              >
+                <LinearGradient colors={['#9B59B6', '#8E44AD']} style={styles.detailActionGradient}>
+                  <TrendingUp size={20} color="#FFFFFF" />
+                  <Text style={styles.detailActionText}>View Analytics</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={styles.detailActionButton}
+                onPress={() => {
+                  setSelectedStudent(null);
+                  Alert.alert('Badge Awarded', `Badge awarded to ${selectedStudent.name}`);
+                }}
+              >
+                <LinearGradient colors={['#FFB347', '#FF8C42']} style={styles.detailActionGradient}>
+                  <Trophy size={20} color="#FFFFFF" />
+                  <Text style={styles.detailActionText}>Award Badge</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
           </ScrollView>
         </View>
       </View>
@@ -299,28 +444,109 @@ export default function StudentsScreen() {
           />
         </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersScroll}>
-          <View style={styles.filtersContainer}>
-            {filters.map((filter) => (
-              <TouchableOpacity
-                key={filter.id}
-                style={[
-                  styles.filterButton,
-                  selectedFilter === filter.id && styles.activeFilter
-                ]}
-                onPress={() => setSelectedFilter(filter.id)}
-              >
-                <Text style={[
-                  styles.filterText,
-                  selectedFilter === filter.id && styles.activeFilterText
-                ]}>
-                  {filter.label} ({filter.count})
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </ScrollView>
+        <View style={styles.filterActions}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersScroll}>
+            <View style={styles.filtersContainer}>
+              {filters.map((filter) => (
+                <TouchableOpacity
+                  key={filter.id}
+                  style={[
+                    styles.filterButton,
+                    selectedFilter === filter.id && styles.activeFilter
+                  ]}
+                  onPress={() => setSelectedFilter(filter.id)}
+                >
+                  <Text style={[
+                    styles.filterText,
+                    selectedFilter === filter.id && styles.activeFilterText
+                  ]}>
+                    {filter.label} ({filter.count})
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
+          
+          <TouchableOpacity 
+            style={styles.advancedFilterButton}
+            onPress={handleAdvancedFilters}
+          >
+            <SlidersHorizontal size={20} color="#666" />
+          </TouchableOpacity>
+        </View>
       </View>
+
+      {/* Multi-select Mode Controls */}
+      <View style={styles.actionBar}>
+        <TouchableOpacity 
+          style={[styles.actionButton, isMultiSelectMode && styles.activeActionButton]} 
+          onPress={toggleMultiSelectMode}
+        >
+          <Text style={[styles.actionButtonText, isMultiSelectMode && styles.activeActionButtonText]}>
+            {isMultiSelectMode ? 'Cancel Selection' : 'Select Multiple'}
+          </Text>
+        </TouchableOpacity>
+        
+        {isMultiSelectMode && (
+          <View style={styles.bulkActions}>
+            <TouchableOpacity 
+              style={styles.bulkActionButton}
+              onPress={() => handleBulkAction('message')}
+            >
+              <MessageCircle size={16} color="#4ECDC4" />
+              <Text style={styles.bulkActionText}>Message</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.bulkActionButton}
+              onPress={() => handleBulkAction('challenge')}
+            >
+              <Trophy size={16} color="#FF6B6B" />
+              <Text style={styles.bulkActionText}>Challenge</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.bulkActionButton}
+              onPress={() => handleBulkAction('export')}
+            >
+              <Download size={16} color="#9B59B6" />
+              <Text style={styles.bulkActionText}>Export</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        
+        {!isMultiSelectMode && (
+          <TouchableOpacity 
+            style={styles.addButton}
+            onPress={handleAddStudent}
+          >
+            <Plus size={20} color="#FFFFFF" />
+          </TouchableOpacity>
+        )}
+      </View>
+
+      {/* Selected Count */}
+      {isMultiSelectMode && selectedStudents.length > 0 && (
+        <View style={styles.selectionBar}>
+          <Text style={styles.selectionText}>
+            {selectedStudents.length} student{selectedStudents.length !== 1 ? 's' : ''} selected
+          </Text>
+          <TouchableOpacity 
+            style={styles.selectAllButton}
+            onPress={() => {
+              if (selectedStudents.length === filteredStudents.length) {
+                setSelectedStudents([]);
+              } else {
+                setSelectedStudents(filteredStudents.map(s => s.id));
+              }
+            }}
+          >
+            <Text style={styles.selectAllText}>
+              {selectedStudents.length === filteredStudents.length ? 'Deselect All' : 'Select All'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Students List */}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -328,7 +554,10 @@ export default function StudentsScreen() {
           {filteredStudents.map((student) => (
             <TouchableOpacity
               key={student.id}
-              style={styles.studentCard}
+              style={[
+                styles.studentCard,
+                isMultiSelectMode && selectedStudents.includes(student.id) && styles.selectedStudentCard
+              ]}
               onPress={() => handleStudentPress(student)}
               activeOpacity={0.8}
             >
@@ -341,9 +570,22 @@ export default function StudentsScreen() {
                   </View>
                 </View>
                 <View style={styles.studentIndicators}>
-                  <View style={[styles.statusIndicator, { backgroundColor: getStatusColor(student.status) }]} />
-                  {student.riskLevel === 'high' && (
-                    <AlertTriangle size={16} color="#FF6B6B" />
+                  {isMultiSelectMode ? (
+                    <View style={[
+                      styles.checkboxIndicator, 
+                      selectedStudents.includes(student.id) && styles.checkedIndicator
+                    ]}>
+                      {selectedStudents.includes(student.id) && (
+                        <Text style={styles.checkboxCheck}>✓</Text>
+                      )}
+                    </View>
+                  ) : (
+                    <>
+                      <View style={[styles.statusIndicator, { backgroundColor: getStatusColor(student.status) }]} />
+                      {student.riskLevel === 'high' && (
+                        <AlertTriangle size={16} color="#FF6B6B" />
+                      )}
+                    </>
                   )}
                 </View>
               </View>
@@ -369,21 +611,29 @@ export default function StudentsScreen() {
 
               <View style={styles.studentFooter}>
                 <Text style={styles.lastActive}>Last active: {student.lastActive}</Text>
-                <View style={styles.quickActions}>
-                  <TouchableOpacity 
-                    style={styles.quickActionBtn}
-                    onPress={() => handleSendMessage(student)}
-                  >
-                    <MessageCircle size={16} color="#4ECDC4" />
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={styles.quickActionBtn}
-                    onPress={() => handleScheduleSession(student)}
-                  >
-                    <Calendar size={16} color="#FFB347" />
-                  </TouchableOpacity>
-                  <ChevronRight size={16} color="#999" />
-                </View>
+                {!isMultiSelectMode && (
+                  <View style={styles.quickActions}>
+                    <TouchableOpacity 
+                      style={styles.quickActionBtn}
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        handleSendMessage(student);
+                      }}
+                    >
+                      <MessageCircle size={16} color="#4ECDC4" />
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={styles.quickActionBtn}
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        handleScheduleSession(student);
+                      }}
+                    >
+                      <Calendar size={16} color="#FFB347" />
+                    </TouchableOpacity>
+                    <ChevronRight size={16} color="#999" />
+                  </View>
+                )}
               </View>
             </TouchableOpacity>
           ))}
@@ -437,8 +687,12 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     color: '#1a1a1a',
   },
+  filterActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   filtersScroll: {
-    marginBottom: 8,
+    flex: 1,
   },
   filtersContainer: {
     flexDirection: 'row',
@@ -464,6 +718,95 @@ const styles = StyleSheet.create({
   activeFilterText: {
     color: '#FFFFFF',
   },
+  advancedFilterButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#f8f9fa',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+  },
+  actionBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  actionButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#f8f9fa',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  activeActionButton: {
+    backgroundColor: '#FF6B6B',
+    borderColor: '#FF6B6B',
+  },
+  actionButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+  },
+  activeActionButtonText: {
+    color: '#FFFFFF',
+  },
+  bulkActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  bulkActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#f8f9fa',
+    gap: 6,
+  },
+  bulkActionText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#666',
+  },
+  addButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#4ECDC4',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  selectionBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 8,
+    backgroundColor: '#f0f0f0',
+  },
+  selectionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1a1a1a',
+  },
+  selectAllButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+  },
+  selectAllText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#4ECDC4',
+  },
   content: {
     flex: 1,
     paddingHorizontal: 24,
@@ -481,6 +824,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+  },
+  selectedStudentCard: {
+    borderWidth: 2,
+    borderColor: '#4ECDC4',
+    backgroundColor: 'rgba(78, 205, 196, 0.05)',
   },
   studentHeader: {
     flexDirection: 'row',
@@ -519,6 +867,24 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
+  },
+  checkboxIndicator: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#ddd',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkedIndicator: {
+    backgroundColor: '#4ECDC4',
+    borderColor: '#4ECDC4',
+  },
+  checkboxCheck: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   studentMetrics: {
     flexDirection: 'row',
@@ -681,6 +1047,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
     marginTop: 20,
+    marginBottom: 12,
   },
   detailActionButton: {
     flex: 1,
