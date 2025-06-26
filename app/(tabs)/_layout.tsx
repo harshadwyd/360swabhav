@@ -1,23 +1,18 @@
 import { Tabs } from 'expo-router';
 import { Chrome as Home, ChartBar as BarChart3, Trophy, User, Plus, Users, TrendingUp, UserCheck, Settings } from 'lucide-react-native';
-import { useUserRole, getCurrentRole } from '@/hooks/useUserRole';
+import { useUserRole } from '@/hooks/useUserRole';
 import { useEffect, useState } from 'react';
 
 export default function TabLayout() {
   const userRole = useUserRole();
-  const [currentRole, setCurrentRole] = useState<'student' | 'coach'>(() => getCurrentRole());
-
-  // Update current role when userRole changes
-  useEffect(() => {
-    setCurrentRole(userRole);
-  }, [userRole]);
-
+  
   // Debug logging
   useEffect(() => {
-    console.log('Current role in TabLayout:', currentRole);
-  }, [currentRole]);
+    console.log('TabLayout - Current role:', userRole);
+  }, [userRole]);
 
-  if (currentRole === 'coach') {
+  if (userRole === 'coach') {
+    console.log('Rendering coach navigation');
     // Coach-only navigation
     return (
       <Tabs
@@ -125,6 +120,7 @@ export default function TabLayout() {
     );
   }
 
+  console.log('Rendering student navigation');
   // Student-only navigation (default)
   return (
     <Tabs

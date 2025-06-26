@@ -31,6 +31,7 @@ export default function Login() {
     
     if (demoAccount) {
       // Set the appropriate role based on the demo account
+      console.log('Setting role to:', demoAccount.role);
       switchUserRole(demoAccount.role as 'student' | 'coach');
       
       Alert.alert(
@@ -39,12 +40,18 @@ export default function Login() {
         [
           {
             text: 'Continue',
-            onPress: () => router.replace('/(tabs)'),
+            onPress: () => {
+              // Small delay to ensure role is set
+              setTimeout(() => {
+                router.replace('/(tabs)');
+              }, 100);
+            },
           },
         ]
       );
     } else {
       // For any other email, default to student role
+      console.log('Setting role to: student (default)');
       switchUserRole('student');
       
       Alert.alert(
@@ -53,7 +60,12 @@ export default function Login() {
         [
           {
             text: 'Continue',
-            onPress: () => router.replace('/(tabs)'),
+            onPress: () => {
+              // Small delay to ensure role is set
+              setTimeout(() => {
+                router.replace('/(tabs)');
+              }, 100);
+            },
           },
         ]
       );

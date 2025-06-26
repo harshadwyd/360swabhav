@@ -61,10 +61,13 @@ export default function OnboardingRoleSelection() {
     
     // Set the user role based on selection
     const userRole = selectedRole === 'coach' ? 'coach' : 'student';
+    console.log('Setting role to:', userRole);
     switchUserRole(userRole);
     
     // Navigate directly to the main app with the selected role
-    router.replace('/(tabs)');
+    setTimeout(() => {
+      router.replace('/(tabs)');
+    }, 100);
   };
 
   return (
