@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Chrome as Home, ChartBar as BarChart3, Trophy, User, Plus, Users, TrendingUp, UserCheck, Settings } from 'lucide-react-native';
+import { House as Home, ChartBar as BarChart3, Trophy, User, Plus, Users, TrendingUp, UserCheck, Settings } from 'lucide-react-native';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useEffect, useState } from 'react';
 
